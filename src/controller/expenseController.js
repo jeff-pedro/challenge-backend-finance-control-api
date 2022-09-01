@@ -3,17 +3,33 @@ import Validation from "./Validation.js";
 
 class ExpenseController {
 
-    static async listAllExpenses(req, res) {
-        await Expenses.find((err, expenses) => {
-            if (!err) {
-                res.status(200).send(expenses);
-            } else {
-                res.status(400).send({ message: err.message });
-            }
-        }).clone();
+    static async findExpenses(req, res) {
+        
+        let { description } = req.query
+        
+        if (description) {
+            // find by description field
+            await Expenses.find({'description': description}, {}, (err, expense) => {
+                if (!err) {
+                    res.status(200).json(expense);
+                } else {
+                    res.status(400).json({ message: err.message });
+                }
+            }).clone();
+        } else {
+            // find all 'expenses'
+            await Expenses.find((err, expenses) => {
+                if (!err) {
+                    res.status(200).json(expenses);
+                } else {
+                    res.status(400).json({ message: err.message });
+                }
+            }).clone();
+        }
+
     }
 
-    static async listExpenseById(req, res) {
+    static async findExpenseById(req, res) {
         const { id } = req.params;
         await Expenses.findById(id, (err, expense) => {
             if (!err) {
@@ -38,7 +54,7 @@ class ExpenseController {
         else if (dataDuplicated) {
             res.json({ message: "This data aldeady exists. Expense hasn't been created." })
         } 
-        // create an "expense"
+        // creates an "expense"
         else {
             let expense = new Expenses(data);
             expense.save((err) => {
