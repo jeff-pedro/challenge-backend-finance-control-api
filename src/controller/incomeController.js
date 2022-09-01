@@ -43,6 +43,25 @@ export default class IncomeController {
         }).clone();
     }
 
+    static findIncomesByDate(req, res) {
+
+        let { year } = req.params;
+        let { month } = req.params;
+
+        // find incomes with year and month passed by paramters, selecting the `description`, `value` and `date` fields
+        Incomes.find({ 
+            $and: [
+                { $expr: { $eq: [{ $year: "$date" }, String(year)] } },
+                { $expr: { $eq: [{ $month: "$date" }, String(month)] } }
+            ]
+        }, 'description value date', (err, incomes) => {
+            if (!err) {
+                res.status(200).json(incomes);
+            }
+        });
+    }
+    
+
     static async createIncome(req, res) {
 
         const data = req.body;
