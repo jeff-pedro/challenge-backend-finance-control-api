@@ -1,4 +1,4 @@
-class Validation {
+export default class Validation {
 
     static async isDuplicated(data, model, id) {
 
@@ -48,6 +48,35 @@ class Validation {
             return false;
         }
     }
-}
 
-export default Validation;
+    static async isValidCategory(data) {
+
+                // valid categories
+                const categoryList = [
+                    'Alimentação',
+                    'Saúde',
+                    'Moradia',
+                    'Transporte',
+                    'Educação',
+                    'Lazer',
+                    'Imprevistos',
+                    'Outras'
+                ]
+                
+                // checks if the category field is empty
+                if (!data.category) {
+                    return  { value: true };     
+                }
+
+                // checks if an valid category was passed              
+                if (categoryList.includes(data.category)) {
+                        return { value: true };
+                } else {
+                        return {
+                            value: false, 
+                            list: categoryList
+                        };
+                }
+    }
+
+}
