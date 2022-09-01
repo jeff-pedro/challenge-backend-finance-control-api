@@ -4,7 +4,7 @@ const {Schema} = mongoose;
 const expenseSchema = new Schema({
     id: { type: String },
     description: { type: String, required: true },
-    category: { type: String },
+    category: { type: String , default: "Outras" },
     value: { type: Number, required: true },
     date: { type: Date, required: true }
 });
