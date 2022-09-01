@@ -2,19 +2,36 @@ import Expenses from "../model/Expense.js";
 import Incomes from "../model/Income.js"
 import Validation from "./Validation.js";
 
-class IncomeController {
+export default class IncomeController {
 
-    static async listAllIncomes(req, res) {
-        await Incomes.find((err, incomes) => {
-            if (!err) {
-                res.status(200).send(incomes);
-            } else {
-                res.status(400).send({ message: err.message })
-            }
-        }).clone();
+    static async findIncomes(req, res) {
+
+        let { description } = req.query;
+
+        if (description) {
+            // find by description
+            await Incomes.find({ 'description': description }, {}, (err, incomes) => {
+                if (!err) {
+                    res.status(200).json(incomes);
+                } else {
+                    res.status(400).json({ message: err.message })
+                }
+            }).clone();
+        } else {
+            // find all incomes
+            await Incomes.find((err, incomes) => {
+                if (!err) {
+                    res.status(200).send(incomes);
+                } else {
+                    res.status(400).send({ message: err.message })
+                }
+            }).clone();
+        }
+
     }
 
-    static async listIncomeById(req, res) {
+    static async findIncomeById(req, res) {
+
         const { id } = req.params;
 
         await Incomes.findById(id, (err, income) => {
@@ -68,6 +85,7 @@ class IncomeController {
     }
 
     static async deleteIncome(req, res) {
+
         const { id } = req.params;
 
         await Incomes.findByIdAndDelete(id, (err) => {
@@ -79,5 +97,3 @@ class IncomeController {
         }).clone();
     }
 }
-
-export default IncomeController;

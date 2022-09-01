@@ -4,10 +4,10 @@ import IncomeController from "../controller/incomeController.js";
 const router = express.Router();
 
 router
-    .get('/receitas', IncomeController.listAllIncomes)
-    .get('/receitas/:id', IncomeController.listIncomeById)
-    .post('/receitas', IncomeController.createIncome)
-    .put('/receitas/:id', IncomeController.updateIncome)
-    .delete('/receitas/:id', IncomeController.deleteIncome)
+    .get('/incomes', IncomeController.findIncomes)
+    .get('/incomes/:id', IncomeController.findIncomeById)
+    .post('/incomes', IncomeController.createIncome)
+    .put('/incomes/:id', IncomeController.updateIncome)
+    .delete('/incomes/:id', IncomeController.deleteIncome)
 
 export default router;
