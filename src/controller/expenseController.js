@@ -27,11 +27,20 @@ class ExpenseController {
     static async createExpense(req, res) {
 
         const data = req.body;
-        const duplicated = await Validation.isDuplicated(data, Expenses);
+        const dataDuplicated = await Validation.isDuplicated(data, Expenses);
+        const validCategory = await Validation.isValidCategory(data);
 
-        if (!duplicated) {
+        // checks valid categories
+        if (!validCategory.value) {
+            res.json({ message: `${data.category} is not valid. Try one of that categories: ${validCategory.list}` })
+        } 
+        // checks duplicated data
+        else if (dataDuplicated) {
+            res.json({ message: "This data aldeady exists. Expense hasn't been created." })
+        } 
+        // create an "expense"
+        else {
             let expense = new Expenses(data);
-            // create an "expense"
             expense.save((err) => {
                 if (!err) {
                     res.status(201).json({ message: "Expense has been created." });
@@ -39,8 +48,6 @@ class ExpenseController {
                     res.status(500).json({ message: err.message });
                 }
             });
-        } else {
-            res.json({ message: "This data aldeady exists. Expense hasn't been created." })
         }
     }
 
