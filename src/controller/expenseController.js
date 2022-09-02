@@ -40,6 +40,24 @@ class ExpenseController {
         }).clone();
     }
 
+    static findExpenseByMonth(req, res) {
+
+        let { year } = req.params;
+        let { month } = req.params;
+
+        // finds all expenses in whith the year and month match the parameters passed
+        Expenses.find({
+            $and: [
+                { $expr: { $eq: [ { $year: '$date' }, String(year) ] } },
+                { $expr: { $eq: [ { $month: '$date' }, String(month) ] } }
+            ]
+        }, 'description category value date', (err, expenses) => {
+            if (err) return handleError(err); // is not defined
+            res.status(200).json(expenses);
+        });
+
+    }
+
     static async createExpense(req, res) {
 
         const data = req.body;

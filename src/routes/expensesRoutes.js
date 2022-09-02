@@ -6,6 +6,7 @@ const router = express.Router();
 router
     .get('/expenses', ExpenseController.findExpenses)
     .get('/expenses/:id', ExpenseController.findExpenseById)
+    .get('/expenses/:year/:month', ExpenseController.findExpenseByMonth)
     .post('/expenses', ExpenseController.createExpense)
     .put('/expenses/:id', ExpenseController.updateExpense)
     .delete('/expenses/:id', ExpenseController.deleteExpense)
