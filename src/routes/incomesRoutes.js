@@ -6,7 +6,7 @@ const router = express.Router();
 router
     .get('/incomes', IncomeController.findIncomes)
     .get('/incomes/:id', IncomeController.findIncomeById)
-    .get('/incomes/:year/:month', IncomeController.findIncomesByDate)
+    .get('/incomes/:year/:month', IncomeController.findIncomesByMonth)
     .post('/incomes', IncomeController.createIncome)
     .put('/incomes/:id', IncomeController.updateIncome)
     .delete('/incomes/:id', IncomeController.deleteIncome)

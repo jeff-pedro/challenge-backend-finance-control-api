@@ -43,12 +43,12 @@ export default class IncomeController {
         }).clone();
     }
 
-    static findIncomesByDate(req, res) {
+    static findIncomesByMonth(req, res) {
 
         let { year } = req.params;
         let { month } = req.params;
 
-        // find incomes with year and month passed by paramters, selecting the `description`, `value` and `date` fields
+        // finds all incomes in whith the year and month match the parameters passed
         Incomes.find({ 
             $and: [
                 { $expr: { $eq: [{ $year: "$date" }, String(year)] } },
@@ -61,7 +61,6 @@ export default class IncomeController {
         });
     }
     
-
     static async createIncome(req, res) {
 
         const data = req.body;
