@@ -1,6 +1,6 @@
 import express from 'express';
 import logger from 'morgan';
-import db from './config/dbConnect.js';
+import db from './config/db.js';
 import routes from './routes/index.js';
 
 const app = express();
@@ -14,7 +14,6 @@ app.use(logger('combined', {
   skip: (req, res) => process.env.NODE_ENV === 'test',
 }));
 
-// call the routes
 routes(app);
 
 export default app;

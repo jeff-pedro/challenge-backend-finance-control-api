@@ -1,7 +1,5 @@
 import Expenses from '../../src/model/Expense.js';
 
-process.env.NODE_ENV = 'test';
-
 describe('Expanses', () => {
   let id;
 

@@ -1,7 +1,5 @@
 import Incomes from '../../src/model/Income.js';
 
-process.env.NODE_ENV = 'test';
-
 describe('Incomes', () => {
   let id;
 

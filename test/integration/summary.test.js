@@ -1,7 +1,8 @@
+process.env.NODE_ENV = 'test';
+
 import Incomes from '../../src/model/Income.js';
 import Expenses from '../../src/model/Expense.js';
 
-process.env.NODE_ENV = 'test';
 
 describe('Summary', () => {
   beforeEach(async () => {
