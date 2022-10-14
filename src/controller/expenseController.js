@@ -1,79 +1,103 @@
-import Expenses from "../model/Expense.js"
-import Validation from "./Validation.js";
+import Expenses from '../model/Expense.js';
 
 class ExpenseController {
+  static async findExpenses(req, res) {
+    const { description } = req.query;
 
-    static async listAllExpenses(req, res) {
-        await Expenses.find((err, expenses) => {
-            if (!err) {
-                res.status(200).send(expenses);
-            } else {
-                res.status(400).send({ message: err.message });
-            }
-        }).clone();
-    }
-
-    static async listExpenseById(req, res) {
-        const { id } = req.params;
-        await Expenses.findById(id, (err, expense) => {
-            if (!err) {
-                res.status(200).send(expense);
-            } else {
-                res.status(400).send({ message: `${err.message} - Error: expense with id:${id} was not found.` });
-            }
-        }).clone();
-    }
-
-    static async createExpense(req, res) {
-
-        const data = req.body;
-        const duplicated = await Validation.isDuplicated(data, Expenses);
-
-        if (!duplicated) {
-            let expense = new Expenses(data);
-            // create an "expense"
-            expense.save((err) => {
-                if (!err) {
-                    res.status(201).json({ message: "Expense has been created." });
-                } else {
-                    res.status(500).json({ message: err.message });
-                }
-            });
+    if (description) {
+      // find by description field
+      await Expenses.find({ description }, {}, (err, expense) => {
+        if (err) {
+          res.status(422).json({ errors: { msg: err.message } });
+        } else if (expense.length === 0) {
+          res.status(404).json({ errors: { msg: 'No description found.' } });
         } else {
-            res.json({ message: "This data aldeady exists. Expense hasn't been created." })
+          res.status(200).json(expense);
         }
-    }
-
-    static async updateExpense(req, res) {
-        const { id } = req.params;
-        const newData = req.body;
-
-        let duplicated = await Validation.isDuplicated(newData, Expenses, id)
-
-        if (!duplicated) {
-            // update an "expense"
-            await Expenses.findByIdAndUpdate(id, { $set: newData }, (err) => {
-                if (!err) {
-                    res.status(200).json({ message: `Expense has been updated.` });
-                } else {
-                    res.status(500).json({ message: `${err.message} - Error: expense with id:${id} hasn't been updated.` });
-                }
-            }).clone();
+      }).clone();
+    } else {
+      // find all 'expenses'
+      await Expenses.find((err, expenses) => {
+        if (err) {
+          res.status(400).json({ errors: { msg: err.message } });
+        } else if (expenses.length === 0) {
+          res.status(404).json({ errors: { msg: 'No expenses found.' } });
         } else {
-            res.json({ message: "This object already exists. For update change the properties' values." })
+          res.status(200).json(expenses);
         }
+      }).clone();
     }
+  }
 
-    static async deleteExpense(req, res) {
-        const { id } = req.params;
-        await Expenses.findByIdAndDelete(id, (err) => {
-            if (!err) {
-                res.status(200).send({ message: `Expense with id:${id} has been deleted.` })
-            } else {
-                res.status(500).send({ message: `${err.message} - Error: expense with id:${id} hasn't deleted.` });
-            }
-        }).clone();
-    }
+  static async findExpenseById(req, res) {
+    const { id } = req.params;
+    await Expenses.findById(id, (err, expense) => {
+      if (!err) {
+        res.status(200).send(expense);
+      } else {
+        res.status(404).send({ errors: { msg: `${err.message} - Error: expense with id:${id} was not found.` } });
+      }
+    }).clone();
+  }
+
+  static findExpenseByMonth(req, res) {
+    const { year } = req.params;
+    const { month } = req.params;
+
+    // finds all expenses in whith the year and month match the parameters passed
+    Expenses.find({
+      $and: [
+        { $expr: { $eq: [{ $year: '$date' }, String(year)] } },
+        { $expr: { $eq: [{ $month: '$date' }, String(month)] } },
+      ],
+    }, 'description category value date', (err, expenses) => {
+      if (err) {
+        res.status(400).json({ errors: { msg: err.message } });
+      } else if (expenses.length === 0) {
+        res.status(404).json({ errors: { msg: 'No expense found on this date.' } });
+      } else {
+        res.status(200).json(expenses);
+      }
+    });
+  }
+
+  static async createExpense(req, res) {
+    const newExpense = new Expenses(req.body);
+
+    newExpense.save((err, expense) => {
+      if (!err) {
+        res.status(201).json({ message: 'Expense was added.', expense });
+      } else {
+        res.status(422).json({ errors: { msg: err.message } });
+      }
+    });
+  }
+
+  static async updateExpense(req, res) {
+    const { id } = req.params;
+    const update = req.body;
+    const options = { new: true };
+
+    Expenses.findByIdAndUpdate(id, update, options, (err, expense) => {
+      if (!err) {
+        res.status(200).json({ message: 'Expense updated.', expense });
+      } else {
+        res.status(422).json({ errors: { msg: `${err.message} - Error: expense with id:${id} was not updated.` } });
+      }
+    });
+  }
+
+  static async deleteExpense(req, res) {
+    const { id } = req.params;
+
+    await Expenses.findByIdAndDelete(id, (err) => {
+      if (!err) {
+        res.status(200).send({ message: `Expense with id:${id} was deleted.` });
+      } else {
+        res.status(422).send({ errors: { msg: `${err.message} - Error: expense with id:${id} was not deleted.` } });
+      }
+    }).clone();
+  }
 }
 
 export default ExpenseController;

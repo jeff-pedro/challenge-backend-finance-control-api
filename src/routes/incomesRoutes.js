@@ -1,13 +1,28 @@
-import express from "express";
-import IncomeController from "../controller/incomeController.js";
+import express from 'express';
+import IncomeController from '../controller/incomeController.js';
+import * as validate from '../validations/incomesValidate.js';
+import Income from '../model/Income.js';
 
 const router = express.Router();
 
 router
-    .get('/receitas', IncomeController.listAllIncomes)
-    .get('/receitas/:id', IncomeController.listIncomeById)
-    .post('/receitas', IncomeController.createIncome)
-    .put('/receitas/:id', IncomeController.updateIncome)
-    .delete('/receitas/:id', IncomeController.deleteIncome)
+  .get('/incomes', IncomeController.findIncomes)
+  .get('/incomes/:id', validate.validID, IncomeController.findIncomeById)
+  .get('/incomes/:year/:month', IncomeController.findIncomesByMonth)
+  .post(
+    '/incomes',
+    validate.fieldsExist,
+    validate.fieldsFormat,
+    validate.dataDuplicated(Income),
+    IncomeController.createIncome,
+  )
+  .put(
+    '/incomes/:id',
+    validate.validID,
+    validate.fieldsFormat,
+    validate.dataDuplicated(Income),
+    IncomeController.updateIncome,
+  )
+  .delete('/incomes/:id', validate.validID, IncomeController.deleteIncome);
 
 export default router;
