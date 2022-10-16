@@ -101,6 +101,8 @@ describe('Incomes', () => {
           done();
         });
     });
+
+    it('should return a message when the user is not founded');
   });
 
   describe('GET /incomes/:year/:month', () => {
@@ -379,6 +381,8 @@ describe('Incomes', () => {
           done();
         });
     });
+
+    it('should return a message when the user is not founded');
   });
 
   describe('DELETE /incomes/:id', () => {
@@ -404,5 +408,7 @@ describe('Incomes', () => {
           done();
         });
     });
+
+    it('should return a message when the user is not founded');
   });
 });
