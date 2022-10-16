@@ -2,6 +2,7 @@ import express from 'express';
 import incomes from './incomesRoutes.js';
 import expenses from './expensesRoutes.js';
 import summary from './summaryRoutes.js';
+import users from './usersRoutes.js';
 
 const routes = (app) => {
   app.route('/').get((req, res) => {
@@ -13,6 +14,7 @@ const routes = (app) => {
     incomes,
     expenses,
     summary,
+    users,
   );
 };
 
