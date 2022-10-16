@@ -7,7 +7,7 @@ describe('Users', () => {
     const user = new Users({
       username: 'admin',
       email: 'admin@admin.com',
-      password: '123',
+      password: '1234567',
     });
 
     const result = await user.save();

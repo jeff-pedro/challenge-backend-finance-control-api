@@ -1,6 +1,6 @@
 import express from 'express';
 import IncomeController from '../controller/incomeController.js';
-import * as validate from '../validations/incomesValidate.js';
+import * as validate from '../helpers/incomesValidate.js';
 import Income from '../model/Income.js';
 
 const router = express.Router();

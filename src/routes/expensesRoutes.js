@@ -1,7 +1,7 @@
 import express from 'express';
 import ExpenseController from '../controller/expenseController.js';
 import Expenses from '../model/Expense.js';
-import * as validade from '../validations/expensesValidate.js';
+import * as validade from '../helpers/expensesValidate.js';
 
 const router = express.Router();
 
