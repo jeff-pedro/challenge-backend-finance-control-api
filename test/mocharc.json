@@ -1,0 +1,7 @@
+{
+  "require": "./test/helpers.js",
+  "recursive": true,
+  "slow": 5000,
+  "timeout": 10000,
+  "exit": true 
+}
