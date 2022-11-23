@@ -1,17 +1,46 @@
 import Users from '../../src/model/User.js';
 
-describe('Users', () => {
-  let id;
+const defaultUser = {
+  username: 'admin',
+  email: 'admin@admin.com',
+  password: 'password123',
+};
 
-  beforeEach(async () => {
-    const user = new Users({
+let accessToken;
+let id;
+
+describe('Users', () => {
+  beforeEach((done) => {
+    const userCredentials = {
       username: 'admin',
       email: 'admin@admin.com',
-      password: '1234567',
-    });
+      password: 'senha1234567',
+    };
 
-    const result = await user.save();
-    id = String(result._id);
+    // register
+    Users.register(
+      new Users(userCredentials),
+      userCredentials.password,
+      (err, user) => {
+        if (err) done(err);
+        id = String(user._id);
+
+        // login
+        request
+          .post('/login')
+          .send(
+            {
+              username: userCredentials.username,
+              password: userCredentials.password,
+            },
+          )
+          .end((err, res) => {
+            if (err) done(err);
+            accessToken = res.header.authorization;
+            done();
+          });
+      },
+    );
   });
 
   afterEach(async () => {
@@ -22,6 +51,7 @@ describe('Users', () => {
     it('should list all users', (done) => {
       request
         .get('/users')
+        .set('Authorization', `bearer ${accessToken}`)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
@@ -47,12 +77,12 @@ describe('Users', () => {
     it('should retrieve a single user given its id', (done) => {
       request
         .get(`/users/${id}`)
+        .set('Authorization', `bearer ${accessToken}`)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('object');
           res.body.should.have.property('username');
           res.body.should.have.property('email');
-          res.body.should.have.property('password');
           res.body.should.have.property('_id').eql(id);
           done();
         });
@@ -61,6 +91,7 @@ describe('Users', () => {
     it('should not list given an invalid id', (done) => {
       request
         .get('/users/InvalidId')
+        .set('Authorization', `bearer ${accessToken}`)
         .end((err, res) => {
           res.should.have.status(422);
           res.body.should.be.an('object');
@@ -74,6 +105,7 @@ describe('Users', () => {
       const dummyId = 'c20ad4d76fe97759aa27a0c9';
       request
         .get(`/users/${dummyId}`)
+        .set('Authorization', `bearer ${accessToken}`)
         .end((err, res) => {
           res.should.have.status(404);
           res.body.should.be.an('object');
@@ -83,188 +115,20 @@ describe('Users', () => {
     });
   });
 
-  describe('POST /users', () => {
-    it('should creates a new user', (done) => {
-      const user = {
-        username: 'gandalf',
-        email: 'thegrey@wizards.com',
-        password: 'aman3021',
-      };
-
-      request
-        .post('/users')
-        .send(user)
-        .end((err, res) => {
-          res.should.have.status(201);
-          res.body.should.be.an('object');
-          res.body.user.should.have.property('username');
-          res.body.user.should.have.property('email');
-          res.body.user.should.have.property('password');
-          res.body.user.should.have.property('_id');
-          res.body.should.have.property('message').eql('User added');
-          done();
-        });
-    });
-
-    it('should return an error when try save an existing user', (done) => {
-      const user = {
-        username: 'admin',
-        email: 'super@admin.com',
-        password: '1234567',
-      };
-
-      request
-        .post('/users')
-        .send(user)
-        .end((err, res) => {
-          res.should.have.status(422);
-          res.body.should.be.an('object');
-          res.body.should.have.property('errors');
-          res.body.errors[0].should.have.property('msg').eql(`username: '${user.username}' already exist`);
-          done();
-        });
-    });
-
-    it('should return an error when the required username field is missing', (done) => {
-      const user = {
-        email: 'admin@admin.com',
-        password: 'admin',
-      };
-
-      request
-        .post('/users')
-        .send(user)
-        .end((err, res) => {
-          res.should.have.status(422);
-          res.body.should.be.an('object');
-          res.body.should.have.property('errors');
-          res.body.errors[0].should.have.property('msg').eql('The username field is required');
-          done();
-        });
-    });
-
-    it('should return an error when the required email field is missing', (done) => {
-      const user = {
-        username: 'admin',
-        password: 'admin',
-      };
-
-      request
-        .post('/users')
-        .send(user)
-        .end((err, res) => {
-          res.should.have.status(422);
-          res.body.should.be.an('object');
-          res.body.should.have.property('errors');
-          res.body.errors[0].should.have.property('msg').eql('The email field is required');
-          done();
-        });
-    });
-
-    it('should return an error when the required password field is missing', (done) => {
-      const user = {
-        username: 'admin',
-        email: 'admin@admin.com',
-      };
-
-      request
-        .post('/users')
-        .send(user)
-        .end((err, res) => {
-          res.should.have.status(422);
-          res.body.should.be.an('object');
-          res.body.should.have.property('errors');
-          res.body.errors[0].should.have.property('msg').eql('The password field is required');
-          done();
-        });
-    });
-
-    it('should return an error when given an invalid username format', (done) => {
-      const user = {
-        username: 1000, // wrong format
-        email: 'gray@wizards.com',
-        password: 'aman3021',
-      };
-
-      request
-        .post('/users')
-        .send(user)
-        .end((err, res) => {
-          res.should.have.status(422);
-          res.body.should.be.an('object');
-          res.body.should.have.property('errors');
-          res.body.errors.should.be.an('array');
-          res.body.errors[0].should.have.property('msg').eql('Username must be a string');
-          done();
-        });
-    });
-
-    it('should return an error when given an invalid email format', (done) => {
-      const user = {
-        username: 'gandalf',
-        email: 'wrong', // invalid format
-        password: 'aman3021',
-      };
-
-      request
-        .post('/users')
-        .send(user)
-        .end((err, res) => {
-          res.should.have.status(422);
-          res.body.should.be.an('object');
-          res.body.should.have.property('errors');
-          res.body.errors.should.be.an('array');
-          res.body.errors[0].should.have.property('msg').eql('Email must be a valid format');
-          done();
-        });
-    });
-
-    it('should return an error when the password lenght is less than 7', (done) => {
-      const user = {
-        username: 'gandalf',
-        email: 'gandalf@wizards.com',
-        password: '123', // must be grather than 6 chars
-      };
-
-      request
-        .post('/users')
-        .send(user)
-        .end((err, res) => {
-          res.should.have.status(422);
-          res.body.should.be.an('object');
-          res.body.should.have.property('errors');
-          res.body.errors.should.be.an('array');
-          res.body.errors[0].should.have.property('msg').eql('Password should be at least 7 chars long');
-          done();
-        });
-    });
-
-    it('should return an error when receiving an empty object', (done) => {
-      request
-        .post('/users')
-        .send({ })
-        .end((err, res) => {
-          res.should.have.status(422);
-          res.body.should.be.an('object');
-          res.body.should.have.property('errors');
-          res.body.errors.should.be.an('array');
-          res.body.errors.length.should.be.eql(3);
-          done();
-        });
-    });
-  });
-
   describe('PUT /users/:id', () => {
-    it('should update an user given its id', (done) => {
-      const update = { password: 'YouShallNotPass' };
+    it('should update a user given its id', (done) => {
+      const update = { password: 'youshallnotpass' };
       request
         .put(`/users/${id}`)
+        .set('Authorization', `bearer ${accessToken}`)
         .send(update)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('object');
           res.body.should.have.property('user');
-          res.body.user.should.have.property('password').eql(update.password);
+          res.body.user.should.have.property('_id');
+          res.body.user.should.have.property('username');
+          res.body.user.should.have.property('email');
           res.body.should.have.property('message').eql('User updated');
           done();
         });
@@ -273,7 +137,7 @@ describe('Users', () => {
     it('should return an error when try update existing username', async () => {
       const user = new Users({
         username: 'sauron',
-        email: 'sasa@morgoth.com',
+        email: 'sasa@maia.com',
         password: 'thedarklord',
       });
       const update = { username: 'admin' };
@@ -282,6 +146,7 @@ describe('Users', () => {
 
       request
         .put(`/users/${id}`)
+        .set('Authorization', `bearer ${accessToken}`)
         .send(update)
         .then((res) => {
           res.should.have.status(422);
@@ -294,6 +159,7 @@ describe('Users', () => {
     it('should return an error when given an invalid username format', (done) => {
       request
         .put(`/users/${id}`)
+        .set('Authorization', `bearer ${accessToken}`)
         .send({ username: 1000 })
         .end((err, res) => {
           res.should.have.status(422);
@@ -308,6 +174,7 @@ describe('Users', () => {
     it('should return an error when given an invalid email format', (done) => {
       request
         .put(`/users/${id}`)
+        .set('Authorization', `bearer ${accessToken}`)
         .send({ email: 'gandalf@' })
         .end((err, res) => {
           res.should.have.status(422);
@@ -322,6 +189,7 @@ describe('Users', () => {
     it('should return an error when the password lenght is less than 7', (done) => {
       request
         .put(`/users/${id}`)
+        .set('Authorization', `bearer ${accessToken}`)
         .send({ password: '123' })
         .end((err, res) => {
           res.should.have.status(422);
@@ -336,6 +204,7 @@ describe('Users', () => {
     it('should return an error when receiving an empty object', (done) => {
       request
         .put(`/users/${id}`)
+        .set('Authorization', `bearer ${accessToken}`)
         .send({})
         .end((err, res) => {
           res.should.have.status(422);
@@ -348,7 +217,8 @@ describe('Users', () => {
 
     it('should return en error when passed an invalid id', (done) => {
       request
-        .get('/users/InvalidId')
+        .put('/users/InvalidId')
+        .set('Authorization', `bearer ${accessToken}`)
         .end((err, res) => {
           res.should.have.status(422);
           res.body.should.be.an('object');
@@ -362,6 +232,7 @@ describe('Users', () => {
       const dummyId = 'c20ad4d76fe97759aa27a0c9';
       request
         .put(`/users/${dummyId}`)
+        .set('Authorization', `bearer ${accessToken}`)
         .send({ password: 'something' })
         .end((err, res) => {
           res.should.have.status(404);
@@ -376,6 +247,7 @@ describe('Users', () => {
     it('should delete an user given its it', (done) => {
       request
         .delete(`/users/${id}`)
+        .set('Authorization', `bearer ${accessToken}`)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('object');
@@ -385,9 +257,10 @@ describe('Users', () => {
         });
     });
 
-    it('should not delete when given an invalid id', (done) => {
+    it('should return an error when try delete with an invalid id', (done) => {
       request
-        .get('/users/InvalidId')
+        .delete('/users/InvalidId')
+        .set('Authorization', `bearer ${accessToken}`)
         .end((err, res) => {
           res.should.have.status(422);
           res.body.should.be.an('object');
@@ -401,6 +274,7 @@ describe('Users', () => {
       const dummyId = 'c20ad4d76fe97759aa27a0c9';
       request
         .delete(`/users/${dummyId}`)
+        .set('Authorization', `bearer ${accessToken}`)
         .end((err, res) => {
           res.should.have.status(404);
           res.body.should.be.an('object');

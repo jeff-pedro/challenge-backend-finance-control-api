@@ -1,8 +1,16 @@
 import Expenses from '../../src/model/Expense.js';
+import Users from '../../src/model/User.js';
 
-describe('Expanses', () => {
-  let id;
+const defaultUser = {
+  username: 'admin',
+  email: 'admin@admin.com',
+  password: 'password123',
+};
 
+let accessToken;
+let id;
+
+describe('Expenses', () => {
   beforeEach(async () => {
     const expenses = await Expenses.create([
       {
@@ -22,12 +30,37 @@ describe('Expanses', () => {
     id = String(expenses[0]._id);
   });
 
+  beforeEach((done) => {
+    // register
+    Users.register(
+      new Users(defaultUser),
+      defaultUser.password,
+      (err, user) => {
+        if (err) done(err);
+        done();
+      },
+    );
+  });
+
+  beforeEach((done) => {
+    // login
+    request
+      .post('/login')
+      .send(defaultUser)
+      .end((err, res) => {
+        if (err) done(err);
+        accessToken = res.header.authorization;
+        done();
+      });
+  });
+
   afterEach(async () => {
     await Expenses.collection.drop();
+    await Users.collection.drop();
   });
 
   describe('GET /', () => {
-    it('should return an Welcome message', (done) => {
+    it('should return a Welcome message', (done) => {
       request
         .get('/')
         .end((err, res) => {
@@ -41,6 +74,7 @@ describe('Expanses', () => {
     it('should return a list of expenses', (done) => {
       request
         .get('/expenses')
+        .auth(accessToken, { type: 'bearer' })
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
@@ -66,6 +100,7 @@ describe('Expanses', () => {
     it('should list a single expense given its id', (done) => {
       request
         .get(`/expenses/${id}`)
+        .auth(accessToken, { type: 'bearer' })
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('object');
@@ -84,6 +119,7 @@ describe('Expanses', () => {
 
       request
         .get(`/expenses/${invalidID}`)
+        .auth(accessToken, { type: 'bearer' })
         .end((err, res) => {
           res.should.have.status(404);
           res.body.should.be.an('object');
@@ -96,6 +132,7 @@ describe('Expanses', () => {
     it('should list all expenses given its description', (done) => {
       request
         .get('/expenses')
+        .auth(accessToken, { type: 'bearer' })
         .query({ description: 'Conta de Energia' })
         .end((err, res) => {
           res.should.have.status(200);
@@ -109,6 +146,7 @@ describe('Expanses', () => {
     it('should not list given an invalid description', (done) => {
       request
         .get('/expenses')
+        .auth(accessToken, { type: 'bearer' })
         .query({ description: 'Invalid description' })
         .end((err, res) => {
           res.should.have.status(404);
@@ -127,6 +165,7 @@ describe('Expanses', () => {
 
       request
         .get(`/expenses/${year}/${month}`)
+        .auth(accessToken, { type: 'bearer' })
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
@@ -146,6 +185,7 @@ describe('Expanses', () => {
 
       request
         .get(`/expenses/${year}/${month}`)
+        .auth(accessToken, { type: 'bearer' })
         .end((err, res) => {
           res.should.have.status(404);
           res.body.should.be.an('object');
@@ -167,6 +207,7 @@ describe('Expanses', () => {
 
       request
         .post('/expenses')
+        .auth(accessToken, { type: 'bearer' })
         .send(newExpense)
         .end((err, res) => {
           res.should.have.status(201);
@@ -192,6 +233,7 @@ describe('Expanses', () => {
 
       request
         .post('/expenses')
+        .auth(accessToken, { type: 'bearer' })
         .send(newExpense)
         .end((err, res) => {
           res.should.have.status(422);
@@ -212,6 +254,7 @@ describe('Expanses', () => {
 
       request
         .post('/expenses')
+        .auth(accessToken, { type: 'bearer' })
         .send(newExpense)
         .end((err, res) => {
           res.should.have.status(422);
@@ -232,6 +275,7 @@ describe('Expanses', () => {
 
       request
         .post('/expenses')
+        .auth(accessToken, { type: 'bearer' })
         .send(newExpense)
         .end((err, res) => {
           res.should.have.status(422);
@@ -252,6 +296,7 @@ describe('Expanses', () => {
 
       request
         .post('/expenses')
+        .auth(accessToken, { type: 'bearer' })
         .send(newExpense)
         .end((err, res) => {
           res.should.have.status(422);
@@ -272,6 +317,7 @@ describe('Expanses', () => {
 
       request
         .post('/expenses')
+        .auth(accessToken, { type: 'bearer' })
         .send(newExpense)
         .end((err, res) => {
           res.should.have.status(422);
@@ -292,6 +338,7 @@ describe('Expanses', () => {
 
       request
         .post('/expenses')
+        .auth(accessToken, { type: 'bearer' })
         .send(newExpense)
         .end((err, res) => {
           res.should.have.status(422);
@@ -305,6 +352,7 @@ describe('Expanses', () => {
     it('should return an error when to be passed an empty json object', (done) => {
       request
         .post('/expenses')
+        .auth(accessToken, { type: 'bearer' })
         .send({})
         .end((err, res) => {
           res.should.status(422);
@@ -325,6 +373,7 @@ describe('Expanses', () => {
       };
       request
         .post('/expenses')
+        .auth(accessToken, { type: 'bearer' })
         .send(expense)
         .end((err, res) => {
           res.should.have.status(422);
@@ -340,6 +389,7 @@ describe('Expanses', () => {
     it('should update a single expense given its id', (done) => {
       request
         .put(`/expenses/${id}`)
+        .auth(accessToken, { type: 'bearer' })
         .send({ value: 500 })
         .end((err, res) => {
           res.should.have.status(200);
@@ -354,6 +404,7 @@ describe('Expanses', () => {
     it('should return an error when try update to an exist expense', (done) => {
       request
         .put(`/expenses/${id}`)
+        .auth(accessToken, { type: 'bearer' })
         .send({ description: 'Convênio' })
         .end((err, res) => {
           res.should.have.status(422);
@@ -367,6 +418,7 @@ describe('Expanses', () => {
     it('should return an error when invalid value to be passed to `description` field', (done) => {
       request
         .put(`/expenses/${id}`)
+        .auth(accessToken, { type: 'bearer' })
         .send({ description: 1000 })
         .end((err, res) => {
           res.should.have.status(422);
@@ -380,6 +432,7 @@ describe('Expanses', () => {
     it('should return an error when invalid value to be passed to `category` field', (done) => {
       request
         .put(`/expenses/${id}`)
+        .auth(accessToken, { type: 'bearer' })
         .send({ category: 'Invalid Category' })
         .end((err, res) => {
           res.should.have.status(422);
@@ -393,6 +446,7 @@ describe('Expanses', () => {
     it('should return an error when invalid value to be passed to `value` field', (done) => {
       request
         .put(`/expenses/${id}`)
+        .auth(accessToken, { type: 'bearer' })
         .send({ value: 'Wrong!' })
         .end((err, res) => {
           res.should.have.status(422);
@@ -406,6 +460,7 @@ describe('Expanses', () => {
     it('should return an error when invalid value to be passed to `date` field', (done) => {
       request
         .put(`/expenses/${id}`)
+        .auth(accessToken, { type: 'bearer' })
         .send({ date: '2022' })
         .end((err, res) => {
           res.should.have.status(422);
@@ -419,6 +474,7 @@ describe('Expanses', () => {
     it('should return an error when to be passed an empty json object', (done) => {
       request
         .put(`/expenses/${id}`)
+        .auth(accessToken, { type: 'bearer' })
         .send({})
         .end((err, res) => {
           res.should.have.status(422);
@@ -432,6 +488,7 @@ describe('Expanses', () => {
     it('should return en error when passed an invalid id', (done) => {
       request
         .put('/incomes/InvalidId')
+        .auth(accessToken, { type: 'bearer' })
         .send({ value: 500 })
         .end((err, res) => {
           res.should.have.status(404);
@@ -447,6 +504,7 @@ describe('Expanses', () => {
     it('should delete a single expense given its id', (done) => {
       request
         .delete(`/expenses/${id}`)
+        .auth(accessToken, { type: 'bearer' })
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('object');
@@ -458,6 +516,7 @@ describe('Expanses', () => {
     it('should not delete when given an invalid id', (done) => {
       request
         .delete('/expenses/InvalidId')
+        .auth(accessToken, { type: 'bearer' })
         .end((err, res) => {
           res.should.have.status(404);
           res.body.should.be.an('object');
