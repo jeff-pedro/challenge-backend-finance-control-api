@@ -24,17 +24,6 @@ export default class UserController {
     });
   }
 
-  static createUser(req, res) {
-    const newUser = new Users(req.body);
-    newUser.save((err, user) => {
-      if (!err) {
-        res.status(201).json({ message: 'User added', user });
-      } else {
-        res.status(422).json({ errors: { msg: err.message } });
-      }
-    });
-  }
-
   static updateUser(req, res) {
     const { id } = req.params;
     const update = req.body;
