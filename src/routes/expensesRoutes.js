@@ -1,28 +1,49 @@
 import express from 'express';
 import ExpenseController from '../controller/expenseController.js';
 import Expenses from '../model/Expense.js';
-import * as validade from '../helpers/expensesValidate.js';
+import * as validate from '../helpers/expensesValidate.js';
+import authenticate from '../auth/middlewareAuth.js';
 
 const router = express.Router();
 
 router
-  .get('/expenses', ExpenseController.findExpenses)
-  .get('/expenses/:id', validade.validID, ExpenseController.findExpenseById)
-  .get('/expenses/:year/:month', ExpenseController.findExpenseByMonth)
+  .get(
+    '/expenses',
+    authenticate.bearer,
+    ExpenseController.findExpenses,
+  )
+  .get(
+    '/expenses/:id',
+    authenticate.bearer,
+    validate.validID,
+    ExpenseController.findExpenseById,
+  )
+  .get(
+    '/expenses/:year/:month',
+    authenticate.bearer,
+    ExpenseController.findExpenseByMonth,
+  )
   .post(
     '/expenses',
-    validade.fieldsExist,
-    validade.fieldsFormat,
-    validade.dataDuplicated(Expenses),
+    authenticate.bearer,
+    validate.fieldsExist,
+    validate.fieldsFormat,
+    validate.dataDuplicated(Expenses),
     ExpenseController.createExpense,
   )
   .put(
     '/expenses/:id',
-    validade.validID,
-    validade.fieldsFormat,
-    validade.dataDuplicated(Expenses),
+    authenticate.bearer,
+    validate.validID,
+    validate.fieldsFormat,
+    validate.dataDuplicated(Expenses),
     ExpenseController.updateExpense,
   )
-  .delete('/expenses/:id', validade.validID, ExpenseController.deleteExpense);
+  .delete(
+    '/expenses/:id',
+    authenticate.bearer,
+    validate.validID,
+    ExpenseController.deleteExpense,
+  );
 
 export default router;
