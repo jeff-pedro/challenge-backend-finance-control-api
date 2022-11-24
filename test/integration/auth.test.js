@@ -1,5 +1,4 @@
 import jwt from 'jsonwebtoken';
-import { token } from 'morgan';
 import Users from '../../src/model/User.js';
 import tokens from '../../src/auth/tokens.js';
 
@@ -471,6 +470,24 @@ describe('Auth', () => {
             done();
           });
       });
+    });
+  });
+
+  describe('GET /check_email/:token', () => {
+    it('should checked as true the user email', (done) => {
+      const token = tokens.emailChecking.create(id);
+      request
+        .get(`/check_email/${token}`)
+        .end((err, res) => {
+          Users.findById(id, (_, user) => {
+            if (err) {
+              done(err);
+            }
+            res.should.have.status(200);
+            user.emailChecked.should.to.be.eql(true);
+            done();
+          });
+        });
     });
   });
 });
