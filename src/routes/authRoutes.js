@@ -28,6 +28,11 @@ route
     '/update_token',
     authenticate.refresh,
     AuthController.login,
+  )
+  .get(
+    '/check_email/:token',
+    authenticate.emailChecking,
+    AuthController.checkEmail,
   );
 
 export default route;

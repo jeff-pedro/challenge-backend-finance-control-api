@@ -5,6 +5,10 @@ import blocklistAccessToken from '../../redis/blocklistAccessToken.js';
 import allowlistRefreshToken from '../../redis/allowlistRefreshToken.js';
 
 async function checkTokenInBlocklist(token, name, blocklist) {
+  if (!blocklist) {
+    return;
+  }
+
   const tokenInBlocklist = await blocklist.tokenExists(token);
   if (tokenInBlocklist) {
     throw new jwt.JsonWebTokenError(`invalid ${name} by logout`);
@@ -84,6 +88,16 @@ export default {
     },
     invalidate(token) {
       return invalidateOpaqueToken(token, this.list);
+    },
+  },
+  emailChecking: {
+    name: 'email checking token',
+    expiration: [1, 'h'],
+    create(id) {
+      return createTokenJWT(id, this.expiration);
+    },
+    verify(token) {
+      return verifyTokenJWT(token, this.name);
     },
   },
 };

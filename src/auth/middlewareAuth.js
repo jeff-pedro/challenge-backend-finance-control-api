@@ -80,4 +80,15 @@ export default {
       res.status(500).json({ error: err.message });
     }
   },
+  emailChecking: async (req, res, next) => {
+    try {
+      const { token } = req.params;
+      const id = await tokens.emailChecking.verify(token);
+      const user = await Users.findById(id);
+      req.user = user;
+      next();
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  },
 };

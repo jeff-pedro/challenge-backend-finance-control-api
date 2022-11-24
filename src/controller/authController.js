@@ -1,5 +1,11 @@
 import Users from '../model/User.js';
 import tokens from '../auth/tokens.js';
+import CheckEmail from '../auth/emails.js';
+
+function generateURL(route, id) {
+  const urlBase = process.env.URL_BASE;
+  return `${urlBase}${route}${id}`;
+}
 
 export default class UserController {
   static register(req, res) {
@@ -12,10 +18,16 @@ export default class UserController {
     Users.register(
       new Users({ username, email }),
       password,
-      (err) => {
+      (err, user) => {
         if (err) {
           return res.status(422).json({ error: err.message });
         }
+
+        // email checking
+        const token = tokens.emailChecking.create(user._id);
+        const emailCheckingURL = generateURL('/check_email/', token);
+        const emailChecking = new CheckEmail(user, emailCheckingURL);
+        emailChecking.sendEmail().catch(console.log);
         res.status(201).json({ message: `${username} registered` });
       },
     );
@@ -40,5 +52,16 @@ export default class UserController {
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
+  }
+
+  static checkEmail(req, res) {
+    const { id } = req.user;
+    const update = { emailChecked: true };
+    Users.findByIdAndUpdate(id, update, (err) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+      }
+      res.status(200).json();
+    });
   }
 }
