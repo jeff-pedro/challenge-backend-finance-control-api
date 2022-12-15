@@ -1,8 +1,14 @@
-process.env.NODE_ENV = 'test';
-
 import Incomes from '../../src/model/Income.js';
 import Expenses from '../../src/model/Expense.js';
+import Users from '../../src/model/User.js';
 
+const defaultUser = {
+  username: 'admin',
+  email: 'admin@admin.com',
+  password: 'password123',
+};
+
+let accessToken;
 
 describe('Summary', () => {
   beforeEach(async () => {
@@ -27,9 +33,34 @@ describe('Summary', () => {
     await expense.save();
   });
 
+  beforeEach((done) => {
+    // register
+    Users.register(
+      new Users(defaultUser),
+      defaultUser.password,
+      (err, user) => {
+        if (err) done(err);
+        done();
+      },
+    );
+  });
+
+  beforeEach((done) => {
+    // login
+    request
+      .post('/login')
+      .send(defaultUser)
+      .end((err, res) => {
+        if (err) done(err);
+        accessToken = res.header.authorization;
+        done();
+      });
+  });
+
   afterEach(async () => {
     await Expenses.collection.drop();
     await Incomes.collection.drop();
+    await Users.collection.drop();
   });
 
   describe('GET /summary/:year/:month', () => {
@@ -38,6 +69,7 @@ describe('Summary', () => {
       const month = 1;
       request
         .get(`/summary/${year}/${month}`)
+        .auth(accessToken, { type: 'bearer' })
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('object');
@@ -57,6 +89,7 @@ describe('Summary', () => {
       const month = 1;
       request
         .get(`/summary/${year}/${month}`)
+        .auth(accessToken, { type: 'bearer' })
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('object');

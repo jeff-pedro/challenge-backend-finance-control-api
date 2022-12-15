@@ -1,5 +1,0 @@
-{
-  "require": "./test/integration/helpers.js",
-  "slow": 5000,
-  "timeout": 10000
-}
