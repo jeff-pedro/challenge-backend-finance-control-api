@@ -1,9 +1,10 @@
 import { createClient } from 'redis';
 import listHandler from './listHandler.js';
 
+const prefix = 'allowlist-refresh-token: ';
+
 const allowlist = createClient({
   url: process.env.REDIS_URL,
-  prefix: 'allowlist-refresh-token: ',
 });
 
 (async () => {
@@ -11,4 +12,4 @@ const allowlist = createClient({
   await allowlist.connect();
 })();
 
-export default listHandler(allowlist);
+export default listHandler(allowlist, prefix);
