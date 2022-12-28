@@ -1,12 +1,12 @@
 import Expenses from '../model/Expense.js';
 
 class ExpenseController {
-  static async findExpenses(req, res) {
+  static findExpenses(req, res) {
     const { description } = req.query;
 
     if (description) {
       // find by description field
-      await Expenses.find({ description }, {}, (err, expense) => {
+      Expenses.find({ description }, {}, (err, expense) => {
         if (err) {
           res.status(422).json({ errors: { msg: err.message } });
         } else if (expense.length === 0) {
@@ -14,10 +14,10 @@ class ExpenseController {
         } else {
           res.status(200).json(expense);
         }
-      }).clone();
+      });
     } else {
       // find all 'expenses'
-      await Expenses.find((err, expenses) => {
+      Expenses.find((err, expenses) => {
         if (err) {
           res.status(400).json({ errors: { msg: err.message } });
         } else if (expenses.length === 0) {
@@ -25,19 +25,19 @@ class ExpenseController {
         } else {
           res.status(200).json(expenses);
         }
-      }).clone();
+      });
     }
   }
 
-  static async findExpenseById(req, res) {
+  static findExpenseById(req, res) {
     const { id } = req.params;
-    await Expenses.findById(id, (err, expense) => {
+    Expenses.findById(id, (err, expense) => {
       if (!err) {
         res.status(200).send(expense);
       } else {
         res.status(404).send({ errors: { msg: `${err.message} - Error: expense with id:${id} was not found.` } });
       }
-    }).clone();
+    });
   }
 
   static findExpenseByMonth(req, res) {
@@ -61,7 +61,7 @@ class ExpenseController {
     });
   }
 
-  static async createExpense(req, res) {
+  static createExpense(req, res) {
     const newExpense = new Expenses(req.body);
 
     newExpense.save((err, expense) => {
@@ -73,7 +73,7 @@ class ExpenseController {
     });
   }
 
-  static async updateExpense(req, res) {
+  static updateExpense(req, res) {
     const { id } = req.params;
     const update = req.body;
     const options = { new: true };
@@ -87,16 +87,16 @@ class ExpenseController {
     });
   }
 
-  static async deleteExpense(req, res) {
+  static deleteExpense(req, res) {
     const { id } = req.params;
 
-    await Expenses.findByIdAndDelete(id, (err) => {
+    Expenses.findByIdAndDelete(id, (err) => {
       if (!err) {
         res.status(200).send({ message: `Expense with id:${id} was deleted.` });
       } else {
         res.status(422).send({ errors: { msg: `${err.message} - Error: expense with id:${id} was not deleted.` } });
       }
-    }).clone();
+    });
   }
 }
 

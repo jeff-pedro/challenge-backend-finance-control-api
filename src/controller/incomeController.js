@@ -1,12 +1,12 @@
 import Incomes from '../model/Income.js';
 
 export default class IncomeController {
-  static async findIncomes(req, res) {
+  static findIncomes(req, res) {
     const { description } = req.query;
 
     if (description) {
       // find by description
-      await Incomes.find({ description }, {}, (err, incomes) => {
+      Incomes.find({ description }, {}, (err, incomes) => {
         if (err) {
           res.status(400).json({ errors: { msg: err.message } });
         } else if (incomes.length === 0) {
@@ -14,10 +14,10 @@ export default class IncomeController {
         } else {
           res.status(200).json(incomes);
         }
-      }).clone();
+      });
     } else {
       // find all incomes
-      await Incomes.find((err, incomes) => {
+      Incomes.find((err, incomes) => {
         if (err) {
           res.status(400).send({ errors: { msg: err.message } });
         } else if (incomes.length === 0) {
@@ -25,20 +25,20 @@ export default class IncomeController {
         } else {
           res.status(200).send(incomes);
         }
-      }).clone();
+      });
     }
   }
 
-  static async findIncomeById(req, res) {
+  static findIncomeById(req, res) {
     const { id } = req.params;
 
-    await Incomes.findById(id, (err, income) => {
+    Incomes.findById(id, (err, income) => {
       if (!err) {
         res.status(200).send(income);
       } else {
         res.status(404).send({ errors: { msg: `${err.message} - "Income" with id:${id} was not found.` } });
       }
-    }).clone();
+    });
   }
 
   static findIncomesByMonth(req, res) {
@@ -62,7 +62,7 @@ export default class IncomeController {
     });
   }
 
-  static async createIncome(req, res) {
+  static createIncome(req, res) {
     const newIncome = new Incomes(req.body);
 
     newIncome.save((err, income) => {
@@ -74,7 +74,7 @@ export default class IncomeController {
     });
   }
 
-  static async updateIncome(req, res) {
+  static updateIncome(req, res) {
     const { id } = req.params;
     const update = req.body;
     const options = { new: true };
@@ -89,15 +89,15 @@ export default class IncomeController {
     });
   }
 
-  static async deleteIncome(req, res) {
+  static deleteIncome(req, res) {
     const { id } = req.params;
 
-    await Incomes.findByIdAndDelete(id, (err) => {
+    Incomes.findByIdAndDelete(id, (err) => {
       if (!err) {
         res.status(200).send({ message: `Income with id:${id} was deleted.` });
       } else {
         res.status(422).send({ errors: { msg: `${err.message} - Error: income with id:${id} was not deleted.` } });
       }
-    }).clone();
+    });
   }
 }
