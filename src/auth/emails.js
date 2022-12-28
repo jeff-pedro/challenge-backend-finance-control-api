@@ -28,7 +28,7 @@ class Email {
     const transporter = nodemailer.createTransport(config);
     const info = await transporter.sendMail(this);
 
-    if (process.env.NODE_ENV !== 'prod') {
+    if (process.env.NODE_ENV === 'dev') {
       console.log(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
     }
   }
