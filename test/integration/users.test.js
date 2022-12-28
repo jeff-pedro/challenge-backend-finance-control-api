@@ -1,10 +1,6 @@
-import Users from '../../src/model/User.js';
+process.env.NODE_ENV = 'test';
 
-const defaultUser = {
-  username: 'admin',
-  email: 'admin@admin.com',
-  password: 'password123',
-};
+import Users from '../../src/model/User.js';
 
 let accessToken;
 let id;

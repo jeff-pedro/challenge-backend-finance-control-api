@@ -1,3 +1,5 @@
+process.env.NODE_ENV = 'test';
+
 import jwt from 'jsonwebtoken';
 import Users from '../../src/model/User.js';
 import tokens from '../../src/auth/tokens.js';
@@ -13,6 +15,11 @@ let refreshToken;
 let id;
 
 describe('Auth', () => {
+  before((done) => {
+    Users.collection.deleteMany();
+    done();
+  });
+
   beforeEach((done) => {
     // register
     Users.register(
@@ -445,7 +452,7 @@ describe('Auth', () => {
         });
     });
 
-    it('should return an new "access token" and "refresh token"', (done) => {
+    it('should return an error when no refresh token is given', (done) => {
       request
         .post('/update_token')
         .send({})

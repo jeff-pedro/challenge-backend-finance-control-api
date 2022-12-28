@@ -1,3 +1,5 @@
+process.env.NODE_ENV = 'test';
+
 import Incomes from '../../src/model/Income.js';
 import Expenses from '../../src/model/Expense.js';
 import Users from '../../src/model/User.js';
