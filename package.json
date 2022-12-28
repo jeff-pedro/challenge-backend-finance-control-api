@@ -33,12 +33,12 @@
     "passport-http-bearer": "^1.0.1",
     "passport-local": "^1.0.0",
     "passport-local-mongoose": "^7.1.2",
-    "redis": "3.0.2"
+    "redis": "^4.0.0-rc.4"
   },
   "devDependencies": {
     "chai": "^4.3.6",
     "chai-http": "^4.3.0",
-    "eslint": "^8.23.1",
+    "eslint": "^8.30.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",
     "mocha": "10.0.0",

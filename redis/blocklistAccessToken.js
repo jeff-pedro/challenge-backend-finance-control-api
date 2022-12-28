@@ -3,8 +3,19 @@ import { createHash } from 'crypto';
 import { createClient } from 'redis';
 import listHandler from './listHandler.js';
 
-const blocklist = createClient({ prefix: 'blocklist-access-token: ' });
-const blocklistHandler = listHandler(blocklist);
+const blocklist = createClient({
+  url: process.env.REDIS_URL,
+  prefix: 'blocklist-access-token: ',
+});
+
+let blocklistHandler;
+
+(async () => {
+  // Connect to redis server
+  await blocklist.connect();
+
+  blocklistHandler = listHandler(blocklist);
+})();
 
 function generateTokenHash(token) {
   return createHash('sha256')
