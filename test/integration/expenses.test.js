@@ -61,17 +61,6 @@ describe('Expenses', () => {
     await Users.collection.drop();
   });
 
-  describe('GET /', () => {
-    it('should return a Welcome message', (done) => {
-      request
-        .get('/')
-        .end((err, res) => {
-          res.should.have.status(200);
-          done();
-        });
-    });
-  });
-
   describe('GET /expenses', () => {
     it('should return a list of expenses', (done) => {
       request
