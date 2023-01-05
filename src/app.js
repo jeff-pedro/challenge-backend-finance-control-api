@@ -24,4 +24,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 routes(app);
 
+// error handling
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500);
+});
+
 export default app;
