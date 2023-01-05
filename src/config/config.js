@@ -6,7 +6,7 @@ dotenv.config({
 
 const config = {
   app: {
-    port: parseInt(process.env.DEV_APP_PORT) || 3000,
+    port: parseInt(process.env.PORT) || 3000,
   },
   db: {
     host: process.env.DB_HOST || 'localhost',
