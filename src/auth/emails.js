@@ -15,7 +15,7 @@ const emailConfigTest = (testAccount) => ({
 });
 
 async function createEmailConfig() {
-  if (process.env.NODE_ENV === 'prod') {
+  if (process.env.NODE_ENV === 'production') {
     return emailConfig;
   }
   const testAccount = await nodemailer.createTestAccount();
