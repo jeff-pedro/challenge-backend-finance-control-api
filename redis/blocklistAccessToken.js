@@ -2,18 +2,25 @@ import jwt from 'jsonwebtoken';
 import { createHash } from 'crypto';
 import { createClient } from 'redis';
 import listHandler from './listHandler.js';
+import { InternalServerError } from '../src/helpers/errorHandler.js';
 
 const prefix = 'blocklist-access-token: ';
-
-const blocklist = createClient({
-  url: process.env.REDIS_URL,
-});
-
+let blocklist;
 let blocklistHandler;
 
 (async () => {
-  // Connect to redis server
-  await blocklist.connect();
+  // Create redis client
+  blocklist = createClient({
+    url: process.env.REDIS_URL,
+  });
+
+  blocklist.on('error', (err) => console.log('Redis Client Error', err));
+  try {
+    // Connect to redis server
+    await blocklist.connect();
+  } catch (err) {
+    throw new InternalServerError(`Redis Connection ${err}`);
+  }
 
   blocklistHandler = listHandler(blocklist, prefix);
 })();

@@ -3,6 +3,7 @@ import moment from 'moment';
 import { randomBytes } from 'crypto';
 import blocklistAccessToken from '../../redis/blocklistAccessToken.js';
 import allowlistRefreshToken from '../../redis/allowlistRefreshToken.js';
+import { InvalidArgumentError } from '../helpers/errorHandler.js';
 
 async function checkTokenInBlocklist(token, name, blocklist) {
   if (!blocklist) {
@@ -17,13 +18,13 @@ async function checkTokenInBlocklist(token, name, blocklist) {
 
 function checkUser(id, name) {
   if (!id) {
-    throw new Error(`${name} invalid`);
+    throw new InvalidArgumentError(`${name} invalid`);
   }
 }
 
 function checkToken(token, name) {
   if (!token) {
-    throw new Error(`no ${name} provided`);
+    throw new InvalidArgumentError(`no ${name} provided`);
   }
 }
 

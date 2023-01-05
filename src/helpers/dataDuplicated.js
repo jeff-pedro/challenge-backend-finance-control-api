@@ -1,3 +1,5 @@
+import { InvalidArgumentError } from "./errorHandler.js";
+
 /*
 * Validates if there are records saved in the database with the
 * same `month and description` as the request sent.
@@ -8,7 +10,7 @@ export default function dataDuplicated(model) {
     const data = req.body;
     const { id } = req.params;
 
-    if (!data) throw new Error('Empty data fields');
+    if (!data) throw new InvalidArgumentError('Empty data fields');
 
     //  reads when all valid fields are passed to the POST/PUT method
     if (data.description && data.date) {
